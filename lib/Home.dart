@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tasks/addData.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -31,7 +32,17 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: Text('ارقام ومعلومات للشركات'),
         backgroundColor: Colors.blue,
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.add))],
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const AddDataForm(),
+                  ),
+                );
+              },
+              icon: Icon(Icons.add))
+        ],
       ),
       body: Container(
         margin: const EdgeInsets.all(15),
@@ -49,7 +60,7 @@ class _HomeState extends State<Home> {
                                 .toString()))
                         .then((_) {
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content:  Text("Phone number copied to clipboard")));
+                          content: Text("Phone number copied to clipboard")));
                     });
                   },
                   icon: Icon(Icons.phone),
