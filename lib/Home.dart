@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tasks/addData.dart';
+import 'package:tasks/update.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -20,6 +21,12 @@ class _HomeState extends State<Home> {
     setState(() {});
   }
 
+  void delete(String id) async {
+    var db = FirebaseFirestore.instance;
+    await db.collection("companies").doc(id).delete();
+    getdatafromfirebase();
+  }
+
   @override
   void initState() {
     getdatafromfirebase();
@@ -30,7 +37,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('ارقام ومعلومات للشركات'),
+        title: const Text('ارقام ومعلومات للشركات'),
         backgroundColor: Colors.blue,
         actions: [
           IconButton(
@@ -41,7 +48,7 @@ class _HomeState extends State<Home> {
                   ),
                 );
               },
-              icon: Icon(Icons.add))
+              icon: const Icon(Icons.add))
         ],
       ),
       body: Container(
@@ -52,21 +59,31 @@ class _HomeState extends State<Home> {
               return ListTile(
                 trailing: IconButton(
                   onPressed: () {
-                    print(companies_data[index].data()['phone']);
-
-                    Clipboard.setData(ClipboardData(
-                            text: companies_data[index]
-                                .data()['phone']
-                                .toString()))
-                        .then((_) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text("Phone number copied to clipboard")));
-                    });
+                    delete(companies_data[index].id);
                   },
-                  icon: Icon(Icons.phone),
+                  icon: const Icon(
+                    Icons.delete,
+                    color: Colors.red,
+                  ),
                 ),
                 leading: Image.asset('assets/mobile.png'),
-                subtitle: Text(companies_data[index].data()['info']),
+                subtitle: Row(
+                  children: [
+                    Expanded(
+                      flex: 9,
+                      child: Text(companies_data[index].data()['info'])),
+                    Expanded(
+                      flex: 1,
+                      child: IconButton(onPressed: () {
+                              Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) =>  UpdateDataForm(data: companies_data[index],),
+                  ),
+                );
+
+                      }, icon: Icon(Icons.update)))
+                  ],
+                ),
                 title: Text(companies_data[index].data()['name']),
               );
             }),
@@ -74,3 +91,17 @@ class _HomeState extends State<Home> {
     );
   }
 }
+
+int ahmed = 0;
+
+
+                  // Clipboard.setData(ClipboardData(
+                  //           text: companies_data[index]
+                  //               .data()['phone']
+                  //               .toString()))
+                  //       .then((_) {
+                  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  //         content: Text("Phone number copied to clipboard")));
+                  //   });
+
+                

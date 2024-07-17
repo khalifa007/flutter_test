@@ -1,36 +1,55 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class AddDataForm extends StatefulWidget {
-  const AddDataForm({Key? key}) : super(key: key);
+class UpdateDataForm extends StatefulWidget {
+  QueryDocumentSnapshot<Map<String, dynamic>> data;
+
+  UpdateDataForm({
+    super.key,
+    required this.data,
+  });
 
   @override
-  State<AddDataForm> createState() => _AddDataFormState();
+  State<UpdateDataForm> createState() => _UpdateDataFormState();
 }
 
-class _AddDataFormState extends State<AddDataForm> {
+class _UpdateDataFormState extends State<UpdateDataForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _infoController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
 
-  void adddata(BuildContext context) async {
-    print('send data');
+  void updateData(BuildContext context) async {
+    print('update data');
     var db = FirebaseFirestore.instance;
-    await db.collection("companies").add({
-      'date': Timestamp.now(),
+    await db.collection("companies").doc(widget.data.id).update({
+      "lastupdate" : Timestamp.now(),
       'info': _infoController.text,
       'location': _locationController.text,
       'name': _nameController.text,
-      'phone': _phoneController.text
+      'phone': int.parse(_phoneController.text)
     }).catchError((e) {
       print('error : ');
       print(e);
     }).then((e) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text("تم اضافة البيانات")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("تم تحديث البيانات")));
     });
+  }
+
+  void updattextfiled() {
+    _infoController.text = widget.data.data()['info'];
+    _nameController.text = widget.data.data()['name'];
+    _locationController.text = widget.data.data()['location'];
+    _phoneController.text = widget.data.data()['phone'].toString();
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    updattextfiled();
+    super.initState();
   }
 
   @override
@@ -46,7 +65,7 @@ class _AddDataFormState extends State<AddDataForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('إضافة رقم الشركة'),
+        title: const Text('تحديث رقم الشركة'),
         backgroundColor: Colors.blue,
       ),
       body: SingleChildScrollView(
@@ -100,7 +119,7 @@ class _AddDataFormState extends State<AddDataForm> {
                 label: 'رقم الهاتف',
                 hint: 'أدخل رقم الهاتف',
                 icon: Icons.phone,
-                keyboardType: TextInputType.phone,
+                keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'الرجاء إدخال رقم الهاتف';
@@ -111,7 +130,7 @@ class _AddDataFormState extends State<AddDataForm> {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () => _submitForm(context),
-                child: const Text('إضافة'),
+                child: const Text('تحديث'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
@@ -154,7 +173,7 @@ class _AddDataFormState extends State<AddDataForm> {
       print('Name: ${_nameController.text}');
       print('Location: ${_locationController.text}');
       print('Phone: ${_phoneController.text}');
-      adddata(context);
+      updateData(context);
     }
   }
 }
